@@ -6,6 +6,9 @@ namespace VDFaceTracking
 {
     public class VDFaceTracking : ResoniteMod
     {
+        internal const string VERSION_CONSTANT = "1.1.4";
+        internal const string AUTHORS_CONSTANT = "Zeith, dfgHiatus, Geenz, Earthmark, Delta, Modern";
+
         [AutoRegisterConfigKey]
         private static readonly ModConfigurationKey<float> EyeOpennessExponent =
           new("quest_pro_eye_open_exponent",
@@ -30,9 +33,8 @@ namespace VDFaceTracking
 
         private static ModConfiguration _config;
 
-        internal const string VERSION_CONSTANT = "1.1.3";
         public override string Name => "VDFaceTracking";
-        public override string Author => "Zeith & dfgHiatus & Geenz & Earthmark & Delta";
+        public override string Author => AUTHORS_CONSTANT;
         public override string Version => VERSION_CONSTANT;
 
         public static VDProxy proxy;

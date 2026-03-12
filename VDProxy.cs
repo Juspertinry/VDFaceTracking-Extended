@@ -96,7 +96,7 @@ namespace VDFaceTracking
                     expressions[FBExpression.LeftRot_y] = leftEyePose.Orientation.Y;
                     expressions[FBExpression.LeftRot_z] = leftEyePose.Orientation.Z;
                     expressions[FBExpression.LeftRot_w] = leftEyePose.Orientation.W;
-
+                    
                     expressions[FBExpression.LeftPos_x] = leftEyePose.Position.X;
                     expressions[FBExpression.LeftPos_y] = leftEyePose.Position.Y;
                     expressions[FBExpression.LeftPos_z] = leftEyePose.Position.Z;
@@ -493,8 +493,8 @@ namespace VDFaceTracking
             eyes.LeftEye.PupilDiameter = 0.004f;
             eyes.LeftEye.Squeeze = leftEyeData.squeeze;
             eyes.LeftEye.Frown = expressions[FBExpression.Lip_Corner_Puller_L] - expressions[FBExpression.Lip_Corner_Depressor_L] * VDFaceTracking.EyeExpressionMult;
-            eyes.LeftEye.InnerBrowVertical = expressions[FBExpression.Inner_Brow_Raiser_L];
-            eyes.LeftEye.OuterBrowVertical = expressions[FBExpression.Outer_Brow_Raiser_L];
+            eyes.LeftEye.InnerBrowVertical = expressions[FBExpression.Inner_Brow_Raiser_L] + -expressions[FBExpression.Brow_Lowerer_L]; // Seems to fix eyebrows lowering
+            eyes.LeftEye.OuterBrowVertical = expressions[FBExpression.Outer_Brow_Raiser_L] + -expressions[FBExpression.Brow_Lowerer_L];
             eyes.LeftEye.Squeeze = expressions[FBExpression.Brow_Lowerer_L];
 
             UpdateEye(eyes.LeftEye, leftEyeData);
@@ -504,8 +504,8 @@ namespace VDFaceTracking
             eyes.RightEye.PupilDiameter = 0.004f;
             eyes.RightEye.Squeeze = rightEyeData.squeeze;
             eyes.RightEye.Frown = expressions[FBExpression.Lip_Corner_Puller_R] - expressions[FBExpression.Lip_Corner_Depressor_R] * VDFaceTracking.EyeExpressionMult;
-            eyes.RightEye.InnerBrowVertical = expressions[FBExpression.Inner_Brow_Raiser_R];
-            eyes.RightEye.OuterBrowVertical = expressions[FBExpression.Outer_Brow_Raiser_R];
+            eyes.RightEye.InnerBrowVertical = expressions[FBExpression.Inner_Brow_Raiser_R] + -expressions[FBExpression.Brow_Lowerer_R]; // Seems to fix eyebrows lowering
+            eyes.RightEye.OuterBrowVertical = expressions[FBExpression.Outer_Brow_Raiser_R] + -expressions[FBExpression.Brow_Lowerer_R];
             eyes.RightEye.Squeeze = expressions[FBExpression.Brow_Lowerer_R];
 
             UpdateEye(eyes.RightEye, rightEyeData);

@@ -7,3 +7,5 @@ This was patched together from [dfgHiatus' QuestPro4Neos mod](https://github.com
 To install this mod go grab the release [over here](https://github.com/Zeitheron/VDFaceTracking/releases/latest) and put it into `Resonite\rml_mods\` folder.
 
 You are going to need [Resonite Mod Loader](https://github.com/resonite-modding-group/ResoniteModLoader), read how to install it there.
+
+This fork adds support for the Independent Gaze Magisk module on a rooted Quest Pro (Module can be found in Singularity).

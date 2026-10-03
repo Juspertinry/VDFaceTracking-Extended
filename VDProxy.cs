@@ -21,6 +21,21 @@ namespace VDFaceTracking
 
         private bool? _isTracking;
 
+        private const byte FaceValidFlag = 0b0001;
+        private const byte TongueShapesFlag = 0b0010;
+        private volatile bool _extendedTongue;
+
+        private enum TongueSource { Stock, Flagged, Detected }
+        private TongueSource? _tongueSource;
+
+        private const float BoltOnMinExtension = 0.3f;
+        private const float BoltOnTolerance = 0.01f;
+        private const int BoltOnMinFrames = 30;
+        private const long BoltOnMinMilliseconds = 1000;
+        private int _boltOnFrames;
+        private long _boltOnSince;
+        private bool _boltOnDetected;
+
         private Thread thread;
 
         private const int NATURAL_EXPRESSIONS_COUNT = FBExpression.Max;
@@ -73,7 +88,7 @@ namespace VDFaceTracking
             else
             {
                 FaceState* faceState = this._faceState;
-                this.IsTracking = new bool?((IntPtr)faceState != IntPtr.Zero && (faceState->LeftEyeIsValid || faceState->RightEyeIsValid || faceState->IsEyeFollowingBlendshapesValid || faceState->FaceIsValid));
+                this.IsTracking = new bool?((IntPtr)faceState != IntPtr.Zero && (faceState->LeftEyeIsValid || faceState->RightEyeIsValid || faceState->IsEyeFollowingBlendshapesValid || (faceState->FaceFlags & FaceValidFlag) != 0));
             }
         }
 
@@ -117,16 +132,87 @@ namespace VDFaceTracking
                     flag = true;
                 }
 
-                if (faceState->FaceIsValid && faceState->IsEyeFollowingBlendshapesValid)
+                if ((faceState->FaceFlags & FaceValidFlag) != 0 && faceState->IsEyeFollowingBlendshapesValid)
                 {
                     for(int i = 0; i < NATURAL_EXPRESSIONS_COUNT; ++i)
                         expressions[i] = expressionWeights[i];
+
+                    UpdateTongueSource(faceState->FaceFlags);
 
                     flag = true;
                 }
             }
             this.IsTracking = new bool?(flag);
         }
+
+        private void UpdateTongueSource(byte faceFlags)
+        {
+            TongueSource source;
+            if ((faceFlags & TongueShapesFlag) != 0)
+            {
+                source = TongueSource.Flagged;
+            }
+            else
+            {
+                UpdateBoltOnDetection();
+                source = _boltOnDetected ? TongueSource.Detected : TongueSource.Stock;
+            }
+
+            if (source == _tongueSource)
+                return;
+
+            _tongueSource = source;
+            _extendedTongue = source != TongueSource.Stock;
+
+            switch (source)
+            {
+                case TongueSource.Flagged:
+                    VDFaceTracking.Msg("Virtual Desktop is sending extended tongue shapes, using them for tongue tracking.");
+                    break;
+                case TongueSource.Detected:
+                    VDFaceTracking.Msg("BoltOn tongue data detected without the extended tongue flag, using it for tongue tracking.");
+                    break;
+                default:
+                    VDFaceTracking.Msg("Using stock tongue tracking.");
+                    break;
+            }
+        }
+
+        private void UpdateBoltOnDetection()
+        {
+            float extension = expressions[FBExpression.TongueExtOut];
+            float left = expressions[FBExpression.TongueExtLeft];
+            float right = expressions[FBExpression.TongueExtRight];
+            float up = expressions[FBExpression.TongueExtUp];
+            float down = expressions[FBExpression.TongueExtDown];
+            float stockOut = expressions[FBExpression.TongueOut];
+
+            bool consistent = InBoltOnRange(extension, 1f)
+                && InBoltOnRange(left, extension) && InBoltOnRange(right, extension)
+                && InBoltOnRange(up, extension) && InBoltOnRange(down, extension)
+                && !(left > 0f && right > 0f)
+                && !(up > 0f && down > 0f)
+                && stockOut >= 0f && stockOut <= BoltOnTolerance;
+
+            if (!consistent)
+            {
+                _boltOnFrames = 0;
+                _boltOnDetected = false;
+                return;
+            }
+
+            if (_boltOnDetected || stockOut != 0f || extension < BoltOnMinExtension)
+                return;
+
+            long now = Environment.TickCount64;
+            if (_boltOnFrames++ == 0)
+                _boltOnSince = now;
+
+            if (_boltOnFrames >= BoltOnMinFrames && now - _boltOnSince >= BoltOnMinMilliseconds)
+                _boltOnDetected = true;
+        }
+
+        private static bool InBoltOnRange(float value, float max) => value >= 0f && value <= max + BoltOnTolerance;
 
         internal unsafe bool Initialize()
         {
@@ -397,7 +483,10 @@ namespace VDFaceTracking
             mouth.LipsRightPress = expressions[FBExpression.Lip_Pressor_R];
             mouth.Jaw = new float3(expressions[FBExpression.Jaw_Sideways_Right] - expressions[FBExpression.Jaw_Sideways_Left], -expressions[FBExpression.Lips_Toward], expressions[FBExpression.Jaw_Thrust]);
             mouth.JawOpen = MathX.Clamp01(expressions[FBExpression.Jaw_Drop] - expressions[FBExpression.Lips_Toward]);
-            mouth.Tongue = new float3(0f, 0f, expressions[FBExpression.TongueOut] - expressions[FBExpression.TongueRetreat]);
+            if (_extendedTongue)
+                mouth.Tongue = new float3(expressions[FBExpression.TongueExtRight] - expressions[FBExpression.TongueExtLeft], expressions[FBExpression.TongueExtUp] - expressions[FBExpression.TongueExtDown], expressions[FBExpression.TongueExtOut]);
+            else
+                mouth.Tongue = new float3(0f, 0f, expressions[FBExpression.TongueOut] - expressions[FBExpression.TongueRetreat]);
             mouth.NoseWrinkleLeft = expressions[FBExpression.Nose_Wrinkler_L];
             mouth.NoseWrinkleRight = expressions[FBExpression.Nose_Wrinkler_R];
             mouth.ChinRaiseBottom = expressions[FBExpression.Chin_Raiser_B];

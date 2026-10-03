@@ -4,8 +4,8 @@ This is a Resonite mod, which lets the game read facial expressions and eye gaze
 
 This was patched together from [dfgHiatus' QuestPro4Neos mod](https://github.com/dfgHiatus/QuestPro4Neos) and [VirtualDesktop](https://www.vrdesktop.net/) VRCFT module.
 
-To install this mod go grab the release [over here](https://github.com/Juspertinry/VDFaceTracking-IndependentGaze/releases/latest) and put it into `Resonite\rml_mods\` folder.
+To install this mod go grab the release [over here](https://github.com/Juspertinry/VDFaceTracking-Extended/releases/latest) and put it into `Resonite\rml_mods\` folder.
 
 You are going to need [Resonite Mod Loader](https://github.com/resonite-modding-group/ResoniteModLoader), read how to install it there.
 
-This fork adds support for the Independent Gaze Magisk module on a rooted Quest Pro (Module can be found in Singularity).
+This fork adds support for the Independent Gaze Magisk module (found in Singularity) and the BoltOn tongue tracking module on a rooted Quest Pro.

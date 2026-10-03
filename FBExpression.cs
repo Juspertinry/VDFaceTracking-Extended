@@ -72,6 +72,11 @@
         public const int TongueBackDorsalVelar = 67;
         public const int TongueOut = 68;
         public const int TongueRetreat = 69;
+        public const int TongueExtOut = 63;
+        public const int TongueExtLeft = 64;
+        public const int TongueExtRight = 65;
+        public const int TongueExtUp = 66;
+        public const int TongueExtDown = 67;
         public const int Max = 70;
 
         // Above are the natural expressions tracked by the Quest Pro

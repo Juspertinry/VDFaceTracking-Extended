@@ -7,7 +7,7 @@ namespace VDFaceTracking
     public class VDFaceTracking : ResoniteMod
     {
         internal const string VERSION_CONSTANT = "1.1.5";
-        internal const string AUTHORS_CONSTANT = "Zeith, dfgHiatus, Geenz, Earthmark, Delta, Modern";
+        internal const string AUTHORS_CONSTANT = "Zeith, dfgHiatus, Geenz, Earthmark, Delta, Modern, Juspertinry";
 
         [AutoRegisterConfigKey]
         private static readonly ModConfigurationKey<float> EyeOpennessExponent =
